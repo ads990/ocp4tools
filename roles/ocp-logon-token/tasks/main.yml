@@ -32,7 +32,7 @@
   command: oc whoami -t --config "{{ kubeconfig }}"
   register: _token
 
-- name: Pass token to api key var
+- name: Pass token to api_key var
   set_fact:
     api_key: "{{ _token.stdout }}"
 
