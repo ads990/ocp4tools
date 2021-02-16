@@ -1,0 +1,42 @@
+---
+# tasks file for ocp-logon-token
+- name: Check if all required vars defined
+  assert:
+    that:
+    - ocpusername is defined
+    - ocppassword is defined
+    - api_url is defined
+
+- name: Create temporary directory
+  tempfile:
+    state: directory
+  register: _tmpdir
+
+- name: Extract temporart dir path
+  set_fact:
+    tmpdir: "{{ _tmpdir.path }}"
+
+- name: Create temporary kubeconfig file
+  set_fact:
+    kubeconfig: "{{ tmpdir }}/kube"
+
+- name: Login to OpenShift at {{ api_url }}
+  command: >
+  oc login "{{ api_url }}"
+  --username "{{ ocpusername }}"
+  --password "{{ ocppassword }}"
+  --config "{{ kubeconfig }}"
+  --insecure-skip-tls-verify
+
+- name: Extract OpenShift token
+  command: oc whoami -t --config "{{ kubeconfig }}"
+  register: _token
+
+- name: Pass token to api key var
+  set_fact:
+    api_key: "{{ _token.stdout }}"
+
+- name: Clean up
+  file:
+    state: absent
+    path: "{{ tmpdir }}"
