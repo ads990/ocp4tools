@@ -1,0 +1,31 @@
+- name: Scale and move registry pod
+  hosts: all
+  gather_facts: false
+  vars:
+    oc: /usr/local/bin/oc
+
+  tasks:
+    - block:
+      
+      - include_role:
+          name: ocp-logon-token
+
+      - name: Scale registry to 1 pod
+        command: >
+          "{{ oc }}" patch configs.imageregistry.operator.openshift.io/cluster 
+          --type merge 
+          -p '{"spec":{"replicas":1}}'
+          --config "{{ kubeconfig }}"
+
+      - name: Move registry to infra node
+        command: >
+          "{{ oc }}" patch configs.imageregistry.operator.openshift.io/cluster 
+          --type merge 
+          -p '{"spec":{"nodeSelector":{"node-role.kubernetes.io/infra":""}}}'
+          --config "{{ kubeconfig }}"
+      
+      always:
+
+      - include_role:
+          name: ocp-logon-token
+          tasks_from: cleanup.yml

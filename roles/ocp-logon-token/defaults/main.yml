@@ -1,2 +1,4 @@
 ---
 # defaults file for ocp-logon-token
+
+oc: /usr/local/bin/oc

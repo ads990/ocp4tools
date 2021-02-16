@@ -1,0 +1,26 @@
+- name: Create project quotas
+  hosts: all
+  gather_facts: false
+  module_defaults:
+    group/k8s:
+      state: 'present'
+      host: "{{ api_url | default(omit) }}"
+      api_key: "{{ api_key | default(omit) }}"
+      validate_certs: false
+
+  tasks:
+    - block:
+      
+      - name: Run role for logon token
+        include_role:
+          name: ocp-logon-token
+        when: not api_key is defined
+
+      - include_role:
+          name: ocp-disable-selfprovisioner
+      
+      always:
+
+      - include_role:
+          name: ocp-logon-token
+          tasks_from: cleanup.yml

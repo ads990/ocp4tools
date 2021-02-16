@@ -1,0 +1,5 @@
+---
+- name: Remove tmp directory
+  file:
+    state: absent
+    path: "{{ tmpdir }}"

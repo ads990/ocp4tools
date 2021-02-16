@@ -12,7 +12,7 @@
     state: directory
   register: _tmpdir
 
-- name: Extract temporart dir path
+- name: Extract temporary dir path
   set_fact:
     tmpdir: "{{ _tmpdir.path }}"
 
@@ -22,21 +22,18 @@
 
 - name: Login to OpenShift at {{ api_url }}
   command: >
-  oc login "{{ api_url }}"
-  --username "{{ ocpusername }}"
-  --password "{{ ocppassword }}"
-  --config "{{ kubeconfig }}"
-  --insecure-skip-tls-verify
+    "{{ oc }}" login "{{ api_url }}"
+    --username "{{ ocpusername }}"
+    --password "{{ ocppassword }}"
+    --config "{{ kubeconfig }}"
+    --insecure-skip-tls-verify
 
 - name: Extract OpenShift token
-  command: oc whoami -t --config "{{ kubeconfig }}"
+  command: >
+    "{{ oc }}" whoami -t --config "{{ kubeconfig }}"
   register: _token
 
 - name: Pass token to api_key var
   set_fact:
     api_key: "{{ _token.stdout }}"
 
-- name: Clean up
-  file:
-    state: absent
-    path: "{{ tmpdir }}"

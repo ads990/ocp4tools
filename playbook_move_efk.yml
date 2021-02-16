@@ -1,0 +1,38 @@
+- name: Move EFK stack to Infra nodes
+  hosts: all
+  gather_facts: false
+  vars:
+    oc: /usr/local/bin/oc
+
+  tasks:
+    - block:
+      
+      - include_role:
+          name: ocp-logon-token
+
+      - name: Patch Curator
+        command: >
+          "{{ oc }}" patch clusterlogging instance -n openshift-logging
+          --type merge 
+          -p '{"spec":{"curation":{"curator":{"nodeSelector":{"node-role.kubernetes.io/infra":""}}}}}'
+          --config "{{ kubeconfig }}"
+      
+      - name: Patch Elasticsearch
+        command: >
+          "{{ oc }}" patch clusterlogging instance -n openshift-logging 
+          --type merge 
+          -p '{"spec":{"logStore":{"elasticSearch":{"nodeSelector":{"node-role.kubernetes.io/infra":""}}}}}'
+          --config "{{ kubeconfig }}"
+
+      - name: Patch Kibana
+        command: >
+          "{{ oc }}" patch clusterlogging instance -n openshift-logging
+          --type merge 
+          -p '{"spec":{"visualization":{"kibana":{"nodeSelector":{"node-role.kubernetes.io/infra":""}}}}}'
+          --config "{{ kubeconfig }}"
+
+      always:
+
+      - include_role:
+          name: ocp-logon-token
+          tasks_from: cleanup.yml

@@ -1,0 +1,16 @@
+---
+# tasks file for ocp-disable-selfprovisioner
+- name: Disable Self-Provisioner
+  k8s:
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    merge_type: 
+      - strategic-merge
+      - merge        
+    state: present
+    name: self-provisioners
+    definition:
+      metadata:
+        annotations:
+          rbac.authorization.kubernetes.io/autoupdate: "false"
+      subjects: null 
