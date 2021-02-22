@@ -1,4 +1,4 @@
-- name: Create project quotas
+- name: Remove self-provisioning permission for authenticated users
   hosts: all
   gather_facts: false
   module_defaults:
